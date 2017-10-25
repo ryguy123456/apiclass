@@ -1,0 +1,13 @@
+after i have a repo
+
+git adds everything - stages things in order to commit
+git add .
+
+committing code to git - saves locally
+git commit -m "this is a message about what i committed"
+
+firgure out what the fuck is going on
+git status
+
+make my version the new master - saves in teh repo, pushes all the changes to the central / cloud repo
+git push origin master

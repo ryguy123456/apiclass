@@ -1,0 +1,6 @@
+
+get the tests all set up
+npm install
+
+run the tests
+npm run test

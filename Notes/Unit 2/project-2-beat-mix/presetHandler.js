@@ -38,7 +38,6 @@ const isValidIndex = (arrayIndex) => {
 
 
 
-console.log(isValidIndex(-1));
 
 // Leave this line so that your presetHandler function can be used elsewhere:
 module.exports = presetHandler;

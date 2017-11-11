@@ -1,0 +1,13 @@
+In the terminal window type:
+
+npm install babel-cli
+This installs one of the two required Babel packages.
+2.
+In the terminal window type:
+
+npm install babel-preset-env
+This installs the second of two required Babel packages.
+3.
+In the terminal, type npm run build and press enter.
+
+You can view the ES5 code in ./lib/main.js.

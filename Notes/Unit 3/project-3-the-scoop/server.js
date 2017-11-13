@@ -255,23 +255,25 @@ function downvote(item, username) {
 }
 
 function createComment(url, request) {
+  console.log(`This is a test!! request: ${request}`);
   const requestComment = request.body && request.body.comment;
   const response = {};
-
-  if (requestComment && requestArticle.id && requestArticle.body && requestArticle.username && requestArticle.articleId) {
+//check to see if the request has all the required fields
+  if (requestComment && requestComment.id && requestComment.body && requestComment.username && requestComment.articleId) {
+//if it does have the fields, then create the comment by setting these fields
     const comment = {
-      id: database.nextCommentId++,
-      body: requestArticle.body,
-      username: requestArticle.username,
-      articleId: requestArticle.articleId,
+      id: database.nextCommentId++,//add to the comment id and set it
+      body: requestComment.body,
+      username: requestComment.username,
+      articleId: requestComments.articleId,
       upvotedBy: [],
-      downvotedBy: [] 
+      downvotedBy: []
     };
 
-    database.articles[article.id] = article;
-    database.users[article.username].articleIds.push(article.id);
+    database.comments[comment.id] = comment;//adds the comment to the database
+    database.users[comment.username].commentIds.push(comment.id); //add the comment id to the user's comments
 
-    response.body = {article: article};
+    response.body = {comment: comment};
     response.status = 201;
   } else {
     response.status = 400;

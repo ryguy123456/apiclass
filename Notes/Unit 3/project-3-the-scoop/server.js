@@ -255,7 +255,8 @@ function downvote(item, username) {
 }
 
 function createComment(url, request) {
-  console.log(`This is a test!! request: ${request}`);
+  console.log('Request is: ', request.body.comment.body );
+  console.log('URL is: ', url);
   const requestComment = request.body && request.body.comment;
   const response = {};
 //check to see if the request has all the required fields

@@ -53,7 +53,7 @@ describe('Scoop - server.js: ', function() {
 
   });
 
-  describe.only('/comments POST', function() {
+  describe('/comments POST', function() {
 
     beforeEach(function() {
       originalNextCommentId = database.nextCommentId;
@@ -316,7 +316,7 @@ describe('Scoop - server.js: ', function() {
 
   });
 
-  describe('/comments/:id DELETE', function() {
+  describe.only('/comments/:id DELETE', function() {
 
     beforeEach(function() {
       database.users['user'] = {

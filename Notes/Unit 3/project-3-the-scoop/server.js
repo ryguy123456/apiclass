@@ -33,7 +33,8 @@ const routes = {
     'POST': createComment
   },
   '/comments/:id': {
-    'GET': getComments
+    'PUT': updateComment,
+    'DELETE':deleteComment
   },
   '/comments/:id/upvote': {
     'GET': getComments
@@ -254,33 +255,140 @@ function downvote(item, username) {
   return item;
 }
 
+//checks if the comment request is valid or not
+function validComment(request) {
+  if (request.body.comment.body && request.body.comment.username && request.body.comment.articleId) {
+    return true;
+  } else {
+    return false;
+  }
+
+}
+
+//checks if the user id is in the database or not
+function isUserExist(username) {
+  if(database.users[username]) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+//checks if the article is in the database or not
+function isArticleExist(articleId) {
+  if(database.articles[articleId]) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 function createComment(url, request) {
-  console.log('Request is: ', request.body.comment.body );
-  console.log('URL is: ', url);
-  const requestComment = request.body && request.body.comment;
+
   const response = {};
-//check to see if the request has all the required fields
-  if (requestComment && requestComment.id && requestComment.body && requestComment.username && requestComment.articleId) {
-//if it does have the fields, then create the comment by setting these fields
-    const comment = {
-      id: database.nextCommentId++,//add to the comment id and set it
-      body: requestComment.body,
-      username: requestComment.username,
-      articleId: requestComments.articleId,
-      upvotedBy: [],
-      downvotedBy: []
+  //creates a "request comment" which will merge the body and the comment. will use this to see if it is a legit request or not
+  const requestComment = request.body && request.body.comment;
+  //check to see if the request has all the required fields
+  if( requestComment && validComment(request) && isUserExist(request.body.comment.username) && isArticleExist(request.body.comment.articleId)){
+    console.log("valid comment");
+    const newComment = {
+    id: database.nextCommentId++,//add to the comment id and set it
+    body: request.body.comment.body,
+    username: request.body.comment.username,
+    articleId: request.body.comment.articleId,
+    upvotedBy: [],
+    downvotedBy: []
     };
-
-    database.comments[comment.id] = comment;//adds the comment to the database
-    database.users[comment.username].commentIds.push(comment.id); //add the comment id to the user's comments
-
-    response.body = {comment: comment};
+    //database.
+    response.body = {comment:newComment};
     response.status = 201;
+    database.comments[newComment.id] = newComment;//adds the comment to the comment database
+    database.users[newComment.username].commentIds.push(newComment.id);//link the comment to the user
+    database.articles[newComment.articleId].commentIds.push(newComment.id);//link the comment to the article
+
   } else {
     response.status = 400;
   }
+  return response;
+}
+
+function isCommentExist(commentId) {
+  if(database.comments[commentId]) {
+    console.log("comment exists");
+    return true;
+  } else {
+    console.log("comment doesnt exists");
+    return false;
+  }
+}
+
+function updateComment(url, request) {
+
+
+  /*request: { body:
+   { comment:
+      { id: 1,
+        body: 'Updated Body',
+        username: 'existing_user',
+  articleId: 1 } } }*/
+
+        const id = Number(url.split('/').filter(segment => segment)[1]);
+        console.log("id: ",id);
+        const savedComment = database.comments[id];
+        console.log("saved comment: ",savedComment);
+        const requestComment = request.body && request.body.comment && request.body.comment.body && request.body.comment.id;
+        console.log("requested comment: ",requestComment);
+        console.log("request: ", request);
+        const response = {};
+
+        if (!id || !requestComment) {
+          response.status = 400;
+        } else if (!savedComment) {
+          response.status = 404;
+        } else {
+          console.log("here");
+          database.comments[request.body.comment.id].body = request.body.comment.body;
+
+          response.body = {article: database.comments[request.body.comment.id]};
+          response.status = 200;
+        }
+
+        return response;
+
+
+}
+
+function deleteComment(url, request) {
+  //get the comment id
+  const id = Number(url.split('/').filter(segment => segment)[1]);
+  //get the comment (if it exists)
+  const savedComment = database.comments[id];
+  const response = {};
+  //check if the id and the comment are legit
+  if (!id || !savedComment) {
+    response.status = 404;//not legit
+  } else {
+    //variablea that will be used for setting/getting
+    const commentUser = database.comments[id].username;
+    const commentArticle = database.comments[id].articleId;
+
+    //creates variable to store all the user's comments
+    const userComments = database.users[commentUser].commentIds
+    //removes the particular comment from that user
+    userComments.splice(userComments.indexOf(id),1);//[id].splic=null;
+    //creates varivale to store all the comments of the article
+    const articleComments = database.articles[commentArticle].commentIds
+    //removes that particualr comment from the article
+    articleComments.splice(articleComments.indexOf(id),1);//[id]=null;
+    //deletes the comment from the db
+    database.comments[id] = null;
+    //response status
+    response.status = 204;
+
+  }
 
   return response;
+
 }
 
 function getComments(url, request) {

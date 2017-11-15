@@ -209,7 +209,7 @@ describe('Scoop - server.js: ', function() {
 
   });
 
-  describe.only('/comments/:id PUT', function() {
+  describe('/comments/:id PUT', function() {
 
     beforeEach(function() {
       database.comments[1] = {

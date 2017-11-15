@@ -290,7 +290,6 @@ function createComment(url, request) {
   const requestComment = request.body && request.body.comment;
   //check to see if the request has all the required fields
   if( requestComment && validComment(request) && isUserExist(request.body.comment.username) && isArticleExist(request.body.comment.articleId)){
-    console.log("valid comment");
     const newComment = {
     id: database.nextCommentId++,//add to the comment id and set it
     body: request.body.comment.body,
@@ -314,47 +313,34 @@ function createComment(url, request) {
 
 function isCommentExist(commentId) {
   if(database.comments[commentId]) {
-    console.log("comment exists");
     return true;
   } else {
-    console.log("comment doesnt exists");
     return false;
   }
 }
 
 function updateComment(url, request) {
+  //get the id, current comment, and updated comment + create response
+  const id = Number(url.split('/').filter(segment => segment)[1]);
+  const savedComment = database.comments[id];
+  const requestComment = request.body && request.body.comment;
+  const response = {};
+  console.log("request: ",request);
 
+  //checks if the requested updated comment is valid
+  if (!id || !requestComment) {
+    response.status = 400;
+  } else if (!savedComment) {//checks if the comment that they want to update is there or not
+    response.status = 404;
+  } else {
+    //updates the comment
+    savedComment.body = requestComment.body || savedComment.body;
+    //updates the response
+    response.body = {comment: savedComment};
+    response.status = 200;
+  }
 
-  /*request: { body:
-   { comment:
-      { id: 1,
-        body: 'Updated Body',
-        username: 'existing_user',
-  articleId: 1 } } }*/
-
-        const id = Number(url.split('/').filter(segment => segment)[1]);
-        //console.log("id: ",id);
-        const savedComment = database.comments[id];
-        //console.log("saved comment: ",savedComment);
-        const requestComment = request.body && request.body.comment && request.body.comment.body && request.body.comment.id;
-        //console.log("requested comment: ",requestComment);
-        //console.log("request: ", request);
-        const response = {};
-
-        if (!id || !requestComment) {
-          response.status = 400;
-        } else if (!savedComment) {
-          response.status = 404;
-        } else {
-          //console.log("here1");//, database.comments[request.body.comment.id].body);
-          //console.log("here1", database.comments, "here2:",request.body.comment);
-
-          database.comments[request.body.comment.id].body = request.body.comment.body;
-          response.body = {article: database.comments[request.body.comment.id]};
-          response.status = 200;
-        }
-
-        return response;
+  return response;
 
 
 }
@@ -492,6 +478,37 @@ const requestHandler = (request, response) => {
     });
   }
 };
+//need these for loading and saving the database
+const yaml = require('js-yaml');
+const fs = require('fs');
+//Reads a yaml file and returns am object that is the db
+function loadDatabase() {
+//try catch statement for error handling
+  try {
+    //loads the yaml file
+    const config = yaml.safeLoad(fs.readFileSync('./db.yml', 'utf8'));
+    return config;
+  } catch (e) {//error handling
+    console.log(e);
+  }
+}
+
+function saveDatabase() {
+  //converts the db into a yaml file
+  const yamlfile = yaml.safeDump (database, {
+    'styles': {
+      '!!null': 'canonical' // dump null as ~
+    },
+    'sortKeys': true        // sort object keys
+  });
+  //writes the yaml file to the db.yml
+  fs.writeFile("./db.yml", yamlfile, function(err) {
+  if(err) {//error handling
+      return console.log(err);
+  }
+})
+}
+
 
 const getRequestRoute = (url) => {
   const pathSegments = url.split('/').filter(segment => segment);

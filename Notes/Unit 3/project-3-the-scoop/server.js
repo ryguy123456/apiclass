@@ -37,10 +37,10 @@ const routes = {
     'DELETE':deleteComment
   },
   '/comments/:id/upvote': {
-    'GET': getComments
+    'PUT': upVoteComment
   },
   '/comments/:id/downvote': {
-    'GET': getComments
+    'PUT': downVoteComment
   }
 };
 
@@ -333,12 +333,12 @@ function updateComment(url, request) {
   articleId: 1 } } }*/
 
         const id = Number(url.split('/').filter(segment => segment)[1]);
-        console.log("id: ",id);
+        //console.log("id: ",id);
         const savedComment = database.comments[id];
-        console.log("saved comment: ",savedComment);
+        //console.log("saved comment: ",savedComment);
         const requestComment = request.body && request.body.comment && request.body.comment.body && request.body.comment.id;
-        console.log("requested comment: ",requestComment);
-        console.log("request: ", request);
+        //console.log("requested comment: ",requestComment);
+        //console.log("request: ", request);
         const response = {};
 
         if (!id || !requestComment) {
@@ -346,9 +346,10 @@ function updateComment(url, request) {
         } else if (!savedComment) {
           response.status = 404;
         } else {
-          console.log("here");
-          database.comments[request.body.comment.id].body = request.body.comment.body;
+          //console.log("here1");//, database.comments[request.body.comment.id].body);
+          //console.log("here1", database.comments, "here2:",request.body.comment);
 
+          database.comments[request.body.comment.id].body = request.body.comment.body;
           response.body = {article: database.comments[request.body.comment.id]};
           response.status = 200;
         }
@@ -391,10 +392,50 @@ function deleteComment(url, request) {
 
 }
 
-function getComments(url, request) {
 
+//method for up voting comments
+function upVoteComment(url, request) {
+  //get the id and the username and the comment
+  const id = Number(url.split('/').filter(segment => segment)[1]);
+  const username = request.body && request.body.username;
+  let savedComment = database.comments[id];
+  //set the response
+  const response = {};
+  //checks if the comment and username are legit
+  if (savedComment && database.users[username]) {
+    //calls the existing upvote method
+    savedComment = upvote(savedComment, username);
+    //returns the response body and status
+    response.body = {comment: savedComment};
+    response.status = 200;
+  } else {//not a legit request
+    response.status = 400;
+  }
+
+  return response;
 }
 
+//method for down voting comments
+function downVoteComment(url, request) {
+  //get the id and the username and the comment
+  const id = Number(url.split('/').filter(segment => segment)[1]);
+  const username = request.body && request.body.username;
+  let savedComment = database.comments[id];
+  //set the response
+  const response = {};
+  //checks if the comment and username are legit
+  if (savedComment && database.users[username]) {
+    //calls the existing downvote method
+    savedComment = downvote(savedComment, username);
+    //returns the response body and status
+    response.body = {comment: savedComment};
+    response.status = 200;
+  } else {//not a legit request
+    response.status = 400;
+  }
+
+  return response;
+}
 
 // Write all code above this line.
 

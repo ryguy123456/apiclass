@@ -209,7 +209,7 @@ describe('Scoop - server.js: ', function() {
 
   });
 
-  describe('/comments/:id PUT', function() {
+  describe.only('/comments/:id PUT', function() {
 
     beforeEach(function() {
       database.comments[1] = {
@@ -316,7 +316,7 @@ describe('Scoop - server.js: ', function() {
 
   });
 
-  describe.only('/comments/:id DELETE', function() {
+  describe('/comments/:id DELETE', function() {
 
     beforeEach(function() {
       database.users['user'] = {

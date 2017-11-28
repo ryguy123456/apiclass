@@ -1,0 +1,5 @@
+Set up body-parsing middleware with the body-parser packagae.
+npm install body-parser
+
+Set up CORS middleware with the cors package. You can use the default settings.
+npm install cors

@@ -1,0 +1,28 @@
+*npm run webpack* and the  refreshing index.html
+
+
+const express = require('express');
+
+const morgan = require('morgan');
+
+const app = express();
+module.exports = app;
+
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
+
+app.use(express.static('public'));
+
+const PORT = process.env.PORT || 4001;
+
+app.listen(PORT,function () {
+    console.log("Server is listening on port: ", PORT);
+  });
+
+//mounts the strips router
+const stripsRouter = express.Router();
+app.use('/strips', stripsRouter);
+
+stripsRouter.get('/', (req, res, next) => {
+
+});
